@@ -13,7 +13,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 public class Constants {
 
     //TODO set the mass/weight in KG for the robot
-    //DO not forget zero power acceleration!!
+    //DO not forget zero power acceleration!!!
     public static FollowerConstants followerConstants = new FollowerConstants()
             .mass(0.0)
             .forwardZeroPowerAcceleration(0.0)
