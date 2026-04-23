@@ -2,35 +2,52 @@ package org.firstinspires.ftc.teamcode.TeleOp;
 
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.Drive.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Hardware.Hardware;
+import org.firstinspires.ftc.teamcode.Vision.ColorSensorVision;
 import org.firstinspires.ftc.teamcode.Vision.LimeLightVision;
 
 public class MainTeleOp extends OpMode {
+    //Hardware setup
     Hardware hw = new Hardware();
+
+    //Mecanum driving
     MecanumDrive drive = new MecanumDrive();
-    LimeLightVision vision = new LimeLightVision();
     double forward, strafe, rotate;
 
+    // LimeLight vision
+    LimeLightVision LimeLight = new LimeLightVision();
     Pose3D botPose;
     LLResult result;
+
+    //Color sensors
+    ColorSensorVision ColorSensor = new ColorSensorVision();
+    ColorSensorVision.DetectableColors detectedColorRightSensor;
+    ColorSensorVision.DetectableColors detectedColorLeftSensor;
+    ColorSensorVision.DetectableColors detectedColorMiddleSensor;
+
+
+
 
     @Override
     public void init() {
         hw.init(hardwareMap);
         drive.init(hw);
-        vision.init(hw);
+        LimeLight.init(hw);
+        ColorSensor.init(hw);
 
         //TODO set the correct pipeline
-        vision.ChangePipeline(0);
+        LimeLight.ChangePipeline(0);
     }
 
     @Override
     public void start() {
         //If the camera falls behind move this to init()
-        vision.StartVision();
+        LimeLight.StartVision();
     }
 
     @Override
@@ -39,8 +56,12 @@ public class MainTeleOp extends OpMode {
         strafe = gamepad1.left_stick_x;
         rotate = gamepad1.right_stick_x;
 
-        botPose = vision.UpdateBotPos();
-        result = vision.GetResults();
+        botPose = LimeLight.UpdateBotPos();
+        result = LimeLight.GetResults();
+
+        detectedColorLeftSensor = ColorSensor.getDetectedColor(hw.colorSensorLeft, telemetry);
+        detectedColorRightSensor = ColorSensor.getDetectedColor(hw.colorSensorRight, telemetry);
+        detectedColorMiddleSensor = ColorSensor.getDetectedColor(hw.colorSensorMiddle, telemetry);
 
         drive.driveFieldRelative(forward, strafe, rotate);
 
