@@ -2,15 +2,17 @@ package org.firstinspires.ftc.teamcode.TeleOp;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import org.firstinspires.ftc.teamcode.Drive.MecanumDrive;
+import org.firstinspires.ftc.teamcode.Hardware.Hardware;
 
 public class MainTeleOp extends OpMode {
-
+    Hardware hardware = new Hardware();
     MecanumDrive drive = new MecanumDrive();
     double forward, strafe, rotate;
 
     @Override
     public void init() {
-        drive.init(hardwareMap);
+        hardware.init(hardwareMap);
+        drive.init(hardware);
     }
 
     @Override
