@@ -27,17 +27,19 @@ public class LimeLightVision {
         hw.limelight.pipelineSwitch(Pipeline);
     }
 
-    public Pose3D updateVision(){
+    public Pose3D UpdateBotPos() {
         orientation = hw.imu.getRobotYawPitchRollAngles();
         hw.limelight.updateRobotOrientation(orientation.getYaw());
         llResult = hw.limelight.getLatestResult();
 
-        if (llResult != null && llResult.isValid()){
+        if (llResult != null && llResult.isValid()) {
             //Return the bot position as Pose3D
             return llResult.getBotpose_MT2();
-        } else{
+        } else {
             return null;
         }
-
+    }
+    public LLResult GetResults() {
+        return llResult;
     }
 }
