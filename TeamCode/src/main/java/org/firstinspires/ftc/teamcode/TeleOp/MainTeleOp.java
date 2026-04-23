@@ -56,7 +56,10 @@ public class MainTeleOp extends OpMode {
         strafe = gamepad1.left_stick_x;
         rotate = gamepad1.right_stick_x;
 
+        // Where the LimeLight thinks the robot is
         botPose = LimeLight.UpdateBotPos();
+
+        // The distance and angle to the april tag
         result = LimeLight.GetResults();
 
         detectedColorLeftSensor = ColorSensor.getDetectedColor(hw.colorSensorLeft, telemetry);

@@ -47,6 +47,6 @@ public class MecanumDrive {
         double newForward = r * Math.sin(theta);
         double newStrafe = r * Math.cos(theta);
 
-        this.drive(newForward, newForward, rotate);
+        this.drive(newForward, newStrafe, rotate);
     }
 }
