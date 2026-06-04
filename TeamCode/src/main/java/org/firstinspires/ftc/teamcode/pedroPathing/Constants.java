@@ -45,7 +45,7 @@ public class Constants {
             .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
             .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD)
             //TODO after running test change and re-upload code
-            //DO NOT FORGET line 18+19
+            //DO NOT FORGET line 18+19+20
             .xVelocity(0.0)
             .yVelocity(0.0);
 

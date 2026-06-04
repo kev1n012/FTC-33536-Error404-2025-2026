@@ -24,12 +24,6 @@ public class MainTeleOp extends OpMode {
     Pose3D botPose;
     LLResult result;
 
-    //Color sensors
-    ColorSensorVision ColorSensor = new ColorSensorVision();
-    ColorSensorVision.DetectableColors detectedColorRightSensor;
-    ColorSensorVision.DetectableColors detectedColorLeftSensor;
-    ColorSensorVision.DetectableColors detectedColorMiddleSensor;
-
 
 
 
@@ -38,7 +32,6 @@ public class MainTeleOp extends OpMode {
         hw.init(hardwareMap);
         drive.init(hw);
         LimeLight.init(hw);
-        ColorSensor.init(hw);
 
         //TODO set the correct pipeline
         LimeLight.ChangePipeline(0);
@@ -61,10 +54,6 @@ public class MainTeleOp extends OpMode {
 
         // The distance and angle to the april tag
         result = LimeLight.GetResults();
-
-        detectedColorLeftSensor = ColorSensor.getDetectedColor(hw.colorSensorLeft, telemetry);
-        detectedColorRightSensor = ColorSensor.getDetectedColor(hw.colorSensorRight, telemetry);
-        detectedColorMiddleSensor = ColorSensor.getDetectedColor(hw.colorSensorMiddle, telemetry);
 
         drive.driveFieldRelative(forward, strafe, rotate);
 
