@@ -13,6 +13,8 @@ import org.firstinspires.ftc.teamcode.Drive.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Hardware.Hardware;
 import org.firstinspires.ftc.teamcode.Vision.LimeLightVision;
 
+import java.util.List;
+
 
 @TeleOp(name = "ImprovedBackupTeleOp")
 public class ImprovedBackupTeleOp extends OpMode {
@@ -25,7 +27,8 @@ public class ImprovedBackupTeleOp extends OpMode {
 
     LimeLightVision LimeLight = new LimeLightVision();
     Pose3D botPose;
-    LLResult result;
+    List<Double> AprilTagCoords;
+    LLResult CamResult;
 
 
 
@@ -62,22 +65,30 @@ public class ImprovedBackupTeleOp extends OpMode {
 
     @Override
     public void loop() {
+        updateDriveInputs();
+
+        CamResult = LimeLight.UpdateCamera();
+        botPose = LimeLight.UpdateBotPos();
+        AprilTagCoords = LimeLight.GetAprilTagCoords();
 
         flywheelSpeedR = hw.flywheelR.getVelocity();
         flywheelsSpeedL = hw.flywheelL.getVelocity();
 
         updateShooterAndIntake();
 
-
-
-
         if (gamepad1.right_stick_button && gamepad1.left_stick_button) {
             hw.ResetImu();
         }
 
+        drive.driveFieldRelative(forward, strafe, rotate);
+
         telemetry.update();
     }
-
+    private void updateDriveInputs(){
+        forward = -gamepad1.left_stick_y;
+        strafe = gamepad1.left_stick_x;
+        rotate = gamepad1.right_stick_x;
+    }
     private void updateShooterAndIntake() {
         //TODO Make this a state machine
         if (gamepad1.right_bumper) {

@@ -1,10 +1,16 @@
 package org.firstinspires.ftc.teamcode.Vision;
 
 import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.Hardware.Hardware;
+import org.opencv.core.Mat;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class LimeLightVision {
 
@@ -13,6 +19,8 @@ public class LimeLightVision {
 
     LLResult llResult;
     YawPitchRollAngles orientation;
+
+    List<Double> AprilTagCoords;
 
     public void init(Hardware hardware){
         //Fill the empty "hw" with the actual hardware
@@ -28,18 +36,52 @@ public class LimeLightVision {
     }
 
     public Pose3D UpdateBotPos() {
+        if (llResult != null && llResult.isValid()) {
+            //Return the bot position as Pose3D
+            return llResult.getBotpose_MT2();
+        }
+        return null;
+    }
+    public LLResult UpdateCamera() {
         orientation = hw.imu.getRobotYawPitchRollAngles();
         hw.limelight.updateRobotOrientation(orientation.getYaw());
         llResult = hw.limelight.getLatestResult();
 
         if (llResult != null && llResult.isValid()) {
-            //Return the bot position as Pose3D
-            return llResult.getBotpose_MT2();
-        } else {
-            return null;
+            return llResult;
         }
+        return null;
     }
-    public LLResult GetResults() {
-        return llResult;
+
+
+    /**
+     * Calculates and returns the relative coordinate data for the primary visible AprilTag.
+     *
+     * @return A List of Doubles containing the following data in order:
+     * <ul>
+     * <li>Index 0: <b>distanceFB</b> - Distance forward and backward from the goal.</li>
+     * <li>Index 1: <b>distanceLR</b> - Distance to the right/left from the center of the goal.</li>
+     * <li>Index 2: <b>distanceH</b> - The vertical height/elevation of the AprilTag.</li>
+     * <li>Index 3: <b>distanceDD</b> - The true 3D diagonal distance to the tag (useful for turrets).</li>
+     * </ul>
+     */
+    public List<Double> GetAprilTagCoords() {
+        // Get the list of visible AprilTags
+        List<LLResultTypes.FiducialResult> fiducialResults = llResult.getFiducialResults();
+
+        // Get the first primary target
+        LLResultTypes.FiducialResult primaryTarget = fiducialResults.get(0);
+
+        // Get its pose relative to the robot space
+        Pose3D tagPoseRobotSpace = primaryTarget.getTargetPoseRobotSpace();
+
+        double distanceFB = tagPoseRobotSpace.getPosition().y; // distance Forward and backward
+        double distanceLR = tagPoseRobotSpace.getPosition().x; // distance Left and Right from the centre of the tag
+        double DistanceH = tagPoseRobotSpace.getPosition().z; // distance Height to the april tag
+        double distanceDD = Math.sqrt(Math.pow(distanceFB,2) + Math.pow(distanceLR, 2) + Math.pow(DistanceH, 2)); // distance Diagonal Distance to the tag (Used for turrets)
+
+        // Fill and return the list
+        AprilTagCoords = Arrays.asList(distanceFB, distanceLR, DistanceH, distanceDD);
+        return AprilTagCoords;
     }
 }
