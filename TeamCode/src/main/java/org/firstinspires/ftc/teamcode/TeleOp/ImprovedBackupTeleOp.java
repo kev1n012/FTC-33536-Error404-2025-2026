@@ -3,11 +3,6 @@ package org.firstinspires.ftc.teamcode.TeleOp;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.IMU;
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
-import com.qualcomm.robotcore.hardware.Servo;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.Drive.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Hardware.Hardware;
@@ -29,6 +24,15 @@ public class ImprovedBackupTeleOp extends OpMode {
     Pose3D botPose;
     List<Double> AprilTagCoords;
     LLResult CamResult;
+
+    enum RobotState{
+        STATE_SHOOT,
+        STATE_INTAKE,
+        STATE_REJECT,
+        STATE_IDLE
+    }
+
+    RobotState currentRobotState = RobotState.STATE_IDLE;
 
 
 
@@ -65,8 +69,6 @@ public class ImprovedBackupTeleOp extends OpMode {
 
     @Override
     public void loop() {
-        updateDriveInputs();
-
         CamResult = LimeLight.UpdateCamera();
         botPose = LimeLight.UpdateBotPos();
         AprilTagCoords = LimeLight.GetAprilTagCoords();
@@ -74,6 +76,8 @@ public class ImprovedBackupTeleOp extends OpMode {
         flywheelSpeedR = hw.flywheelR.getVelocity();
         flywheelsSpeedL = hw.flywheelL.getVelocity();
 
+        updateDriveInputs();
+        UpdateState();
         updateShooterAndIntake();
 
         if (gamepad1.right_stick_button && gamepad1.left_stick_button) {
@@ -90,35 +94,54 @@ public class ImprovedBackupTeleOp extends OpMode {
         rotate = gamepad1.right_stick_x;
     }
     private void updateShooterAndIntake() {
-        //TODO Make this a state machine
-        if (gamepad1.right_bumper) {
-            hw.intake.setPower(INTAKE_POWER);
-            hw.helperMotor.setPower(0.5);
-            hw.flywheelL.setPower(0.0);
-            hw.flywheelR.setPower(0.0);
-            hw.shooterServo.setPosition(0);
-        } else if (gamepad1.right_trigger >= 0.2f) {
-            hw.intake.setPower(INTAKE_POWER);
-            hw.helperMotor.setPower(0.5);
-            hw.flywheelL.setPower(SHOOTER_POWER);
-            hw.flywheelR.setPower(SHOOTER_POWER);
-            if (flywheelsSpeedL > DESIRED_FLYWHEEL_SPEED && flywheelSpeedR > DESIRED_FLYWHEEL_SPEED) {
-                hw.shooterServo.setPosition(OPEN_SERVO_POS);
-            }
-        } else if (gamepad1.left_trigger >= 0.5f) {
-            hw.intake.setPower(-INTAKE_POWER);
-            hw.helperMotor.setPower(-0.5);
-            hw.flywheelL.setPower(-SHOOTER_POWER);
-            hw.flywheelR.setPower(-SHOOTER_POWER);
-            hw.shooterServo.setPosition(0.25);
-        } else {
-            hw.intake.setPower(0.0);
-            hw.helperMotor.setPower(0.0);
-            hw.flywheelL.setPower(0.0);
-            hw.flywheelR.setPower(0.0);
-            if (flywheelsSpeedL > CLOSE_SHOOTER_SERVO && flywheelSpeedR > CLOSE_SHOOTER_SERVO) {
+        switch (currentRobotState){
+            case STATE_IDLE:
+                hw.intake.setPower(0.0);
+                hw.helperMotor.setPower(0.0);
+                hw.flywheelL.setPower(0.0);
+                hw.flywheelR.setPower(0.0);
+                if (flywheelsSpeedL > CLOSE_SHOOTER_SERVO && flywheelSpeedR > CLOSE_SHOOTER_SERVO) {
+                    hw.shooterServo.setPosition(0);
+                }
+                break;
+
+            case STATE_SHOOT:
+                hw.intake.setPower(INTAKE_POWER);
+                hw.helperMotor.setPower(0.5);
+                hw.flywheelL.setPower(SHOOTER_POWER);
+                hw.flywheelR.setPower(SHOOTER_POWER);
+                if (flywheelsSpeedL > DESIRED_FLYWHEEL_SPEED && flywheelSpeedR > DESIRED_FLYWHEEL_SPEED) {
+                    hw.shooterServo.setPosition(OPEN_SERVO_POS);
+                }
+                break;
+
+            case STATE_INTAKE:
+                hw.intake.setPower(INTAKE_POWER);
+                hw.helperMotor.setPower(0.5);
+                hw.flywheelL.setPower(0.0);
+                hw.flywheelR.setPower(0.0);
                 hw.shooterServo.setPosition(0);
-            }
+                break;
+
+            case STATE_REJECT:
+                hw.intake.setPower(-INTAKE_POWER);
+                hw.helperMotor.setPower(-0.5);
+                hw.flywheelL.setPower(-SHOOTER_POWER);
+                hw.flywheelR.setPower(-SHOOTER_POWER);
+                hw.shooterServo.setPosition(0.25);
+                break;
+        }
+    }
+
+    private void UpdateState(){
+        if(gamepad1.right_trigger_pressed){
+            currentRobotState = RobotState.STATE_SHOOT;
+        } else if (gamepad1.left_trigger_pressed){
+            currentRobotState = RobotState.STATE_REJECT;
+        } else if (gamepad1.right_bumper){
+            currentRobotState = RobotState.STATE_INTAKE;
+        } else {
+            currentRobotState = RobotState.STATE_IDLE;
         }
     }
 

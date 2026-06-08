@@ -69,7 +69,6 @@ public class Hardware {
 
         imu.initialize(new IMU.Parameters(RevOrientation));
     }
-
     public void ResetImu(){
         imu.resetYaw();
     }
