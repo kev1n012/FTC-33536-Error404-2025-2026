@@ -59,8 +59,7 @@ public class Hardware {
 
         imu = hardwareMap.get(IMU.class, "imu");
 
-        //TODO fill in the correct name
-        limelight = hardwareMap.get(Limelight3A.class, "PlaceHolder");
+        limelight = hardwareMap.get(Limelight3A.class, "limelight");
 
         RevHubOrientationOnRobot RevOrientation = new RevHubOrientationOnRobot(
                 RevHubOrientationOnRobot.LogoFacingDirection.RIGHT,

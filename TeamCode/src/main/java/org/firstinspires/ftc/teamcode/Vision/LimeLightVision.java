@@ -67,6 +67,10 @@ public class LimeLightVision {
         // Get the list of visible AprilTags
         List<LLResultTypes.FiducialResult> fiducialResults = llResult.getFiducialResults();
 
+        if (fiducialResults.isEmpty()) {
+            return null;
+        }
+
         // Get the first primary target
         LLResultTypes.FiducialResult primaryTarget = fiducialResults.get(0);
 
@@ -75,11 +79,11 @@ public class LimeLightVision {
 
         double distanceFB = tagPoseRobotSpace.getPosition().y; // distance Forward and backward
         double distanceLR = tagPoseRobotSpace.getPosition().x; // distance Left and Right from the centre of the tag
-        double DistanceH = tagPoseRobotSpace.getPosition().z; // distance Height to the april tag
-        double distanceDD = Math.sqrt(Math.pow(distanceFB,2) + Math.pow(distanceLR, 2) + Math.pow(DistanceH, 2)); // distance Diagonal Distance to the tag (Used for turrets)
+        double distanceH = tagPoseRobotSpace.getPosition().z; // distance Height to the april tag
+        double distanceDD = Math.sqrt(Math.pow(distanceFB,2) + Math.pow(distanceLR, 2) + Math.pow(distanceH, 2)); // distance Diagonal Distance to the tag (Used for turrets)
 
         // Fill and return the list
-        AprilTagCoords = Arrays.asList(distanceFB, distanceLR, DistanceH, distanceDD);
+        AprilTagCoords = Arrays.asList(distanceFB, distanceLR, distanceH, distanceDD);
         return AprilTagCoords;
     }
 }

@@ -7,7 +7,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.Drive.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Hardware.Hardware;
 import org.firstinspires.ftc.teamcode.Vision.LimeLightVision;
-
 import java.util.List;
 
 
@@ -31,10 +30,7 @@ public class ImprovedBackupTeleOp extends OpMode {
         STATE_REJECT,
         STATE_IDLE
     }
-
     RobotState currentRobotState = RobotState.STATE_IDLE;
-
-
 
 
     private double flywheelSpeedR = 0;
@@ -71,7 +67,7 @@ public class ImprovedBackupTeleOp extends OpMode {
     public void loop() {
         CamResult = LimeLight.UpdateCamera();
         botPose = LimeLight.UpdateBotPos();
-        AprilTagCoords = LimeLight.GetAprilTagCoords();
+        //AprilTagCoords = LimeLight.GetAprilTagCoords();
 
         flywheelSpeedR = hw.flywheelR.getVelocity();
         flywheelsSpeedL = hw.flywheelL.getVelocity();
@@ -83,7 +79,9 @@ public class ImprovedBackupTeleOp extends OpMode {
         if (gamepad1.right_stick_button && gamepad1.left_stick_button) {
             hw.ResetImu();
         }
-
+        telemetry.addData("Forward", forward);
+        telemetry.addData("Strafe", strafe);
+        telemetry.addData("Rotate", rotate);
         drive.driveFieldRelative(forward, strafe, rotate);
 
         telemetry.update();
