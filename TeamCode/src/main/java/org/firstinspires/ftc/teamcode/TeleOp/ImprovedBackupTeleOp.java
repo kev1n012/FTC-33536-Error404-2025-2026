@@ -39,12 +39,12 @@ public class ImprovedBackupTeleOp extends OpMode {
     private static final double OPEN_SERVO_POS = 0.25;
 
     //TODO change from RPM to velocity
-    private final int DESIRED_FLYWHEEL_SPEED = 3900;
-    private final int CLOSE_SHOOTER_SERVO = 1500;
+    private final int DESIRED_FLYWHEEL_SPEED = 100;
+    private final int CLOSE_SHOOTER_SERVO = 50;
 
-    private static final double INTAKE_POWER = -0.3;
+    private static final double INTAKE_POWER = -0.6;
 
-    private static double SHOOTER_POWER = 0.80;
+    private static double SHOOTER_POWER = 10000;
 
 
     @Override
@@ -52,7 +52,6 @@ public class ImprovedBackupTeleOp extends OpMode {
         hw.init(hardwareMap);
         drive.init(hw);
         LimeLight.init(hw);
-
         LimeLight.ChangePipeline(0);
         hw.shooterServo.setPosition(0);
         telemetry.addData("Status", "Fully Initialized");
@@ -67,7 +66,7 @@ public class ImprovedBackupTeleOp extends OpMode {
     public void loop() {
         CamResult = LimeLight.UpdateCamera();
         botPose = LimeLight.UpdateBotPos();
-        //AprilTagCoords = LimeLight.GetAprilTagCoords();
+        AprilTagCoords = LimeLight.GetAprilTagCoords();
 
         flywheelSpeedR = hw.flywheelR.getVelocity();
         flywheelsSpeedL = hw.flywheelL.getVelocity();
@@ -79,9 +78,7 @@ public class ImprovedBackupTeleOp extends OpMode {
         if (gamepad1.right_stick_button && gamepad1.left_stick_button) {
             hw.ResetImu();
         }
-        telemetry.addData("Forward", forward);
-        telemetry.addData("Strafe", strafe);
-        telemetry.addData("Rotate", rotate);
+
         drive.driveFieldRelative(forward, strafe, rotate);
 
         telemetry.update();
@@ -96,8 +93,8 @@ public class ImprovedBackupTeleOp extends OpMode {
             case STATE_IDLE:
                 hw.intake.setPower(0.0);
                 hw.helperMotor.setPower(0.0);
-                hw.flywheelL.setPower(0.0);
-                hw.flywheelR.setPower(0.0);
+                hw.flywheelL.setVelocity(0.0);
+                hw.flywheelR.setVelocity(0.0);
                 if (flywheelsSpeedL > CLOSE_SHOOTER_SERVO && flywheelSpeedR > CLOSE_SHOOTER_SERVO) {
                     hw.shooterServo.setPosition(0);
                 }
@@ -106,8 +103,8 @@ public class ImprovedBackupTeleOp extends OpMode {
             case STATE_SHOOT:
                 hw.intake.setPower(INTAKE_POWER);
                 hw.helperMotor.setPower(0.5);
-                hw.flywheelL.setPower(SHOOTER_POWER);
-                hw.flywheelR.setPower(SHOOTER_POWER);
+                hw.flywheelL.setVelocity(SHOOTER_POWER);
+                hw.flywheelR.setVelocity(SHOOTER_POWER);
                 if (flywheelsSpeedL > DESIRED_FLYWHEEL_SPEED && flywheelSpeedR > DESIRED_FLYWHEEL_SPEED) {
                     hw.shooterServo.setPosition(OPEN_SERVO_POS);
                 }
@@ -116,16 +113,16 @@ public class ImprovedBackupTeleOp extends OpMode {
             case STATE_INTAKE:
                 hw.intake.setPower(INTAKE_POWER);
                 hw.helperMotor.setPower(0.5);
-                hw.flywheelL.setPower(0.0);
-                hw.flywheelR.setPower(0.0);
+                hw.flywheelL.setVelocity(0.0);
+                hw.flywheelR.setVelocity(0.0);
                 hw.shooterServo.setPosition(0);
                 break;
 
             case STATE_REJECT:
                 hw.intake.setPower(-INTAKE_POWER);
                 hw.helperMotor.setPower(-0.5);
-                hw.flywheelL.setPower(-SHOOTER_POWER);
-                hw.flywheelR.setPower(-SHOOTER_POWER);
+                hw.flywheelL.setVelocity(-SHOOTER_POWER);
+                hw.flywheelR.setVelocity(-SHOOTER_POWER);
                 hw.shooterServo.setPosition(0.25);
                 break;
         }

@@ -29,6 +29,8 @@ public class LimeLightVision {
         hw.limelight.start();
     }
 
+    public void StopVision(){hw.limelight.stop();}
+
     public void ChangePipeline(int Pipeline){
         hw.limelight.pipelineSwitch(Pipeline);
     }
@@ -64,10 +66,14 @@ public class LimeLightVision {
      * </ul>
      */
     public List<Double> GetAprilTagCoords() {
+
+        if (llResult == null || !llResult.isValid()) {
+            return null;
+        }
         // Get the list of visible AprilTags
         List<LLResultTypes.FiducialResult> fiducialResults = llResult.getFiducialResults();
 
-        if (fiducialResults.isEmpty()) {
+        if (fiducialResults == null || fiducialResults.isEmpty()) {
             return null;
         }
 
@@ -75,11 +81,11 @@ public class LimeLightVision {
         LLResultTypes.FiducialResult primaryTarget = fiducialResults.get(0);
 
         // Get its pose relative to the robot space
-        Pose3D tagPoseRobotSpace = primaryTarget.getTargetPoseRobotSpace();
-
-        double distanceFB = tagPoseRobotSpace.getPosition().y; // distance Forward and backward
-        double distanceLR = tagPoseRobotSpace.getPosition().x; // distance Left and Right from the centre of the tag
-        double distanceH = tagPoseRobotSpace.getPosition().z; // distance Height to the april tag
+        Pose3D tagPoseCameraSpace = primaryTarget.getTargetPoseCameraSpace();
+        ///NOTE Made it so its -0.02M as an correction offset
+        double distanceFB = tagPoseCameraSpace.getPosition().z - 0.02; // distance Forward and backward
+        double distanceLR = tagPoseCameraSpace.getPosition().x; // distance Left and Right from the centre of the tag
+        double distanceH = tagPoseCameraSpace.getPosition().y; // distance Height to the april tag
         double distanceDD = Math.sqrt(Math.pow(distanceFB,2) + Math.pow(distanceLR, 2) + Math.pow(distanceH, 2)); // distance Diagonal Distance to the tag (Used for turrets)
 
         // Fill and return the list

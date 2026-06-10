@@ -2,11 +2,16 @@ package org.firstinspires.ftc.teamcode.Drive;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.Hardware.Hardware;
+import java.util.List;
 
 public class MecanumDrive {
 
     //Make an empty class for the hardware
     private Hardware hw;
+
+    private final double kP = 1.2;
+    private final double minPower = 0.01;
+    private final double DEADZONE_METERS = 0.02;
 
     public void init(Hardware hardware){
         //Fill the empty "hw" with the actual hardware
@@ -42,4 +47,38 @@ public class MecanumDrive {
 
         this.drive(newForward, newStrafe, rotate);
     }
+
+    /**
+     * Automatically rotates the robot to center on the AprilTag.
+     * @param aprilTagCoords The coordinates list from your Limelight method
+     */
+    public void autoTarget(List<Double> aprilTagCoords) {
+        if (aprilTagCoords == null || aprilTagCoords.size() < 2) {
+            this.drive(0, 0, 0);
+            return;
+        }
+
+        //Get the rotation
+        double distanceLR = aprilTagCoords.get(1);
+
+        //Check if we are in the target deadzone
+        if (Math.abs(distanceLR) <= DEADZONE_METERS) {
+            this.drive(0, 0, 0);
+            return;
+        }
+
+        double rotatePower = distanceLR * kP;
+
+        // Ensure enough power to overcome friction
+        if (Math.abs(rotatePower) < minPower) {
+            rotatePower = Math.signum(rotatePower) * minPower;
+        }
+
+        // Bind power to min and max
+        rotatePower = Math.max(-0.6, Math.min(0.6, rotatePower));
+
+        this.drive(0, 0, rotatePower);
+    }
 }
+
+
