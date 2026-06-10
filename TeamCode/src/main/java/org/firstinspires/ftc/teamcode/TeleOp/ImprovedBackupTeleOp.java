@@ -33,8 +33,7 @@ public class ImprovedBackupTeleOp extends OpMode {
     RobotState currentRobotState = RobotState.STATE_IDLE;
 
 
-    private double flywheelSpeedR = 0;
-    private double flywheelsSpeedL = 0;
+    private double flywheelSpeedR, flywheelsSpeedL;
 
     private static final double OPEN_SERVO_POS = 0.25;
 

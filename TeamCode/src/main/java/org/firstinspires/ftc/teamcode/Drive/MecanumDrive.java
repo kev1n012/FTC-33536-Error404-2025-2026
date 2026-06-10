@@ -52,10 +52,9 @@ public class MecanumDrive {
      * Automatically rotates the robot to center on the AprilTag.
      * @param aprilTagCoords The coordinates list from your Limelight method
      */
-    public void autoTarget(List<Double> aprilTagCoords) {
+    public double autoTarget(List<Double> aprilTagCoords) {
         if (aprilTagCoords == null || aprilTagCoords.size() < 2) {
-            this.drive(0, 0, 0);
-            return;
+            return 0.0;
         }
 
         //Get the rotation
@@ -64,7 +63,7 @@ public class MecanumDrive {
         //Check if we are in the target deadzone
         if (Math.abs(distanceLR) <= DEADZONE_METERS) {
             this.drive(0, 0, 0);
-            return;
+            return 0.0;
         }
 
         double rotatePower = distanceLR * kP;
@@ -76,8 +75,7 @@ public class MecanumDrive {
 
         // Bind power to min and max
         rotatePower = Math.max(-0.6, Math.min(0.6, rotatePower));
-
-        this.drive(0, 0, rotatePower);
+        return rotatePower;
     }
 }
 

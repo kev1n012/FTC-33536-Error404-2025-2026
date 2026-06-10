@@ -4,6 +4,7 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
+import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.Hardware.Hardware;
 
@@ -91,5 +92,13 @@ public class LimeLightVision {
         // Fill and return the list
         AprilTagCoords = Arrays.asList(distanceFB, distanceLR, distanceH, distanceDD);
         return AprilTagCoords;
+    }
+
+    public double getVelocityCubicMath(double distance) {
+        if (distance < 0.98) distance = 0.98;
+        if (distance > 4.00) distance = 4.00;
+
+        double Vel = (-32.6854 * Math.pow(distance, 3)) + (262.4488 * Math.pow(distance, 2)) - (459.9345 * distance) + 1837.8575;
+        return Vel;
     }
 }
