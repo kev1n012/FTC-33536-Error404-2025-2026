@@ -53,7 +53,8 @@ public class MainTeleOp extends OpMode {
         botPose = LimeLight.UpdateBotPos();
 
         // The distance and angle to the april tag
-        result = LimeLight.UpdateCamera();
+        //FIXME Update with new method (TestTelOp)
+        //result = LimeLight.UpdateCamera();
 
         drive.driveFieldRelative(forward, strafe, rotate);
 

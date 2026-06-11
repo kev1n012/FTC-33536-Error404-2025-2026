@@ -1,13 +1,13 @@
 package org.firstinspires.ftc.teamcode.Hardware;
 
 import com.qualcomm.hardware.limelightvision.Limelight3A;
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
+
+import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
+import org.firstinspires.ftc.teamcode.GoBildaPinpointDriver;
 
 public class Hardware {
 
@@ -15,11 +15,12 @@ public class Hardware {
     public DcMotorEx flywheelL, flywheelR, intake, helperMotor;
 
     public Servo shooterServo;
-    public IMU imu;
     public Limelight3A limelight;
     public NormalizedColorSensor colorSensorLeft, colorSensorRight, colorSensorMiddle;
 
-    public void init(HardwareMap hardwareMap){
+    public GoBildaPinpointDriver imu;
+
+    public void init(HardwareMap hardwareMap) {
 
         frontLeftMotor = hardwareMap.get(DcMotorEx.class, "front_left");
         frontRightMotor = hardwareMap.get(DcMotorEx.class, "front_right");
@@ -28,13 +29,9 @@ public class Hardware {
 
         flywheelL = hardwareMap.get(DcMotorEx.class, "flywheelL");
         flywheelR = hardwareMap.get(DcMotorEx.class, "flywheelR");
-
         intake = hardwareMap.get(DcMotorEx.class, "intake");
-
         shooterServo = hardwareMap.get(Servo.class, "shooter_servo");
-
         helperMotor = hardwareMap.get(DcMotorEx.class, "helper_motor");
-
 
         frontLeftMotor.setDirection(DcMotorEx.Direction.REVERSE);
         frontRightMotor.setDirection(DcMotorEx.Direction.REVERSE);
@@ -43,7 +40,6 @@ public class Hardware {
 
         flywheelR.setDirection(DcMotorEx.Direction.FORWARD);
         flywheelL.setDirection(DcMotorEx.Direction.REVERSE);
-
         intake.setDirection(DcMotorEx.Direction.REVERSE);
         helperMotor.setDirection(DcMotorEx.Direction.FORWARD);
 
@@ -57,18 +53,23 @@ public class Hardware {
         backLeftMotor.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         backRightMotor.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
 
-        imu = hardwareMap.get(IMU.class, "imu");
-
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
 
-        RevHubOrientationOnRobot RevOrientation = new RevHubOrientationOnRobot(
-                RevHubOrientationOnRobot.LogoFacingDirection.RIGHT,
-                RevHubOrientationOnRobot.UsbFacingDirection.UP
-        );
+        imu = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
 
-        imu.initialize(new IMU.Parameters(RevOrientation));
+        imu.setOffsets(93.0, -95.0);
+
+        imu.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
+
+        imu.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD, GoBildaPinpointDriver.EncoderDirection.FORWARD);
+
+        imu.resetPosAndIMU();
     }
-    public void ResetImu(){
-        imu.resetYaw();
+
+    public void ResetImu() {
+        imu.resetPosAndIMU();
     }
+
+    public double GetOrientation(){
+        return Math.toDegrees(imu.getHeading());    }
 }

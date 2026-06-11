@@ -63,7 +63,8 @@ public class ImprovedBackupTeleOp extends OpMode {
 
     @Override
     public void loop() {
-        CamResult = LimeLight.UpdateCamera();
+        //FIXME Add back the ll update (Look at TestTeleOp)
+        //CamResult = LimeLight.UpdateCamera();
         botPose = LimeLight.UpdateBotPos();
         AprilTagCoords = LimeLight.GetAprilTagCoords();
 
