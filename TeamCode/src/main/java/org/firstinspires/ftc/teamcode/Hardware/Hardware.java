@@ -70,6 +70,11 @@ public class Hardware {
         imu.resetPosAndIMU();
     }
 
+    public void setFlywheels(double speed) {
+        this.flywheelL.setVelocity(speed);
+        this.flywheelR.setVelocity(speed);
+    }
+
     public double GetOrientation(){
         return Math.toDegrees(imu.getHeading());    }
 }

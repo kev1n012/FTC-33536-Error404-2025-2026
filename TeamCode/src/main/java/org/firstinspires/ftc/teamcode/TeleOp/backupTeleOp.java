@@ -18,7 +18,6 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.Exposur
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainControl;
 import java.util.concurrent.TimeUnit;
 
-@TeleOp(name = "backupTeleOp")
 public class backupTeleOp extends OpMode {
 
     private static final double DEADZONE_DEGREES = 2.0;

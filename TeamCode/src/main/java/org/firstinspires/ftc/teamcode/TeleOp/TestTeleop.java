@@ -19,7 +19,6 @@ public class TestTeleop extends OpMode {
 
     private double flywheelSpeedR, flywheelsSpeedL;
 
-    // These will now be updated automatically by the cubic math equations
     private int CurVol = 0;
     private int CurOpenSpeed = 0;
     private int CurCloseSpeed = 0;
@@ -37,7 +36,6 @@ public class TestTeleop extends OpMode {
     Pose3D botPose;
     List<Double> AprilTagCoords;
     LLResult CamResult;
-    public double orientation;
 
     private boolean UseAutoVel = true;
     private boolean ManualShootClose = true;
@@ -63,14 +61,13 @@ public class TestTeleop extends OpMode {
 
     @Override
     public void loop() {
-        // 1. Read default joystick inputs
         forward = -gamepad1.left_stick_y;
         strafe = gamepad1.left_stick_x;
         rotate = gamepad1.right_stick_x;
 
         hw.imu.update();
 
-        CamResult = LimeLight.UpdateCamera(orientation);
+        CamResult = LimeLight.UpdateCamera();
         botPose = LimeLight.UpdateBotPos();
         AprilTagCoords = LimeLight.GetAprilTagCoords();
 
@@ -80,16 +77,16 @@ public class TestTeleop extends OpMode {
         CheckShootingMode();
         CheckManualShootingDistance();
 
-        // 4. INTEGRATION: Automatically calculate outputs if Auto Mode is active
         if (UseAutoVel && CamResult != null && CamResult.isValid() && AprilTagCoords != null) {
             double rawDistance = AprilTagCoords.get(0);
-            // Constrain math range between 1.5m and 3.0m to prevent curve runaway
-            double x = Math.max(1.5, Math.min(3.0, rawDistance));
 
-            // Execute the precise cubic target calculations derived from your lookup table
-            CurVol        = (int) ((-133.3333 * Math.pow(x, 3)) + (900.0 * Math.pow(x, 2)) - (1816.6667 * x) + 2600.0);
-            CurOpenSpeed  = (int) ((-66.6667 * Math.pow(x, 3)) + (400.0 * Math.pow(x, 2)) - (583.3333 * x) + 1550.0);
-            CurCloseSpeed = (int) ((66.6667 * Math.pow(x, 3)) - (400.0 * Math.pow(x, 2)) + (983.3333 * x) + 300.0);
+            // Query your clean linear lookup table rather than the broken cubic formulas
+            LimeLightVision.ShotPreset activeShot = LimeLight.getInterpolatedShot(rawDistance);
+
+            // Assign variables continuously using linear scaling
+            CurVol        = (int) activeShot.velocity;
+            CurOpenSpeed  = (int) activeShot.servoOpen;
+            CurCloseSpeed = (int) activeShot.servoClose;
         }
 
         // 5. Manual overrides (D-pad & bumpers can still adjust values when UseAutoVel is false)
@@ -112,13 +109,13 @@ public class TestTeleop extends OpMode {
         if (gamepad1.right_trigger > 0.2) {
             hw.intake.setPower(INTAKE_POWER);
             hw.helperMotor.setPower(HELPER_POWER);
-            setFlywheels(CurVol);
+            hw.setFlywheels(CurVol);
         } else if (gamepad1.right_bumper) {
-            setFlywheels(0);
+            hw.setFlywheels(0);
             hw.intake.setPower(INTAKE_POWER);
             hw.helperMotor.setPower(HELPER_POWER);
         } else {
-            setFlywheels(0);
+            hw.setFlywheels(0);
             hw.intake.setPower(0);
             hw.helperMotor.setPower(0);
         }
@@ -154,11 +151,6 @@ public class TestTeleop extends OpMode {
     @Override
     public void stop() {
         LimeLight.StopVision();
-    }
-
-    private void setFlywheels(int speed) {
-        hw.flywheelL.setVelocity(speed);
-        hw.flywheelR.setVelocity(speed);
     }
 
     private void CheckShootingMode() {
