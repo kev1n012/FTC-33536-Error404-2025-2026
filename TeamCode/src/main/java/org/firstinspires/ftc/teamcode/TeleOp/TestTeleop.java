@@ -11,7 +11,7 @@ import org.firstinspires.ftc.teamcode.Vision.LimeLightVision;
 
 import java.util.List;
 
-@TeleOp(name = "==Test==")
+//@TeleOp(name = "==Test==")
 public class TestTeleop extends OpMode {
 
     // Hardware setup

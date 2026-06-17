@@ -6,16 +6,15 @@ import java.util.List;
 
 public class MecanumDrive {
 
-    // Make an empty class for the hardware
     private Hardware hw;
 
     // Tuned constants for smooth tracking
-    private final double kP_Turn = 1.3;
-    private final double kP_Drive = 0.8;       // Lowered from 1.3 to stop the aggressive forward/backward shaking
+    private final double kP_Turn = 1.15; // TODO tune
+    private final double kP_Drive = 0.8;
     private final double kP_Strafe = 1.0;      // Adjusted for cleaner sideways sliding
     private final double minPower = 0.04;      // Smooth floor to overcome friction
-    private final double LR_DEADZONE_METERS = 0.02; // Slightly tightened deadzones
-    private final double FB_DEADZONE_METERS = 0.02;
+    private final double LR_DEADZONE_METERS = 0.03;
+    private final double FB_DEADZONE_METERS = 0.03;
 
     public void init(Hardware hardware){
         this.hw = hardware;
@@ -69,7 +68,6 @@ public class MecanumDrive {
             return 0.0;
         }
 
-        // Camera X inversion applied for correct clockwise/counterclockwise reaction
         double rotatePower = -distanceLR * kP_Turn;
 
         if (Math.abs(rotatePower) < minPower) {
@@ -93,39 +91,30 @@ public class MecanumDrive {
 
         double distanceErrorFB = currentDistanceFB - targetDistance;
 
-        // FIX: Removed the negative sign. If the tag is to the right (positive),
-        // we want positive strafe power to slide the robot right toward it.
         double distanceErrorLR = currentDistanceLR;
 
-        // Absolute breakout deadzone to prevent jittering when completely settled
         if (Math.abs(distanceErrorLR) <= LR_DEADZONE_METERS && Math.abs(distanceErrorFB) <= FB_DEADZONE_METERS) {
             this.drive(0, 0, 0);
             return;
         }
 
-        // 4. Calculate Forward/Backward Power with a smooth minimum ramp
         double FB_Power = 0.0;
         if (Math.abs(distanceErrorFB) > FB_DEADZONE_METERS) {
             FB_Power = distanceErrorFB * kP_Drive;
             FB_Power += Math.signum(FB_Power) * minPower;
         }
 
-        // 5. Calculate Strafe Power with a smooth minimum ramp
         double LR_Power = 0.0;
         if (Math.abs(distanceErrorLR) > LR_DEADZONE_METERS) {
             LR_Power = distanceErrorLR * kP_Strafe;
             LR_Power += Math.signum(LR_Power) * minPower;
         }
 
-        // 6. Heading is locked at 0.0 because you want pure translation without spinning
         double rotatePower = 0.0;
 
-        // 7. Cap limits cleanly to prevent fast overshooting
         FB_Power = Math.max(-0.4, Math.min(0.4, FB_Power));
         LR_Power = Math.max(-0.4, Math.min(0.4, LR_Power));
 
-        // 8. CRITICAL FIX: Plug LR_Power into the strafe parameter (the second slot)
-        // and lock rotation at 0.0 so the heading never changes.
         this.drive(FB_Power, LR_Power, rotatePower);
     }
 }

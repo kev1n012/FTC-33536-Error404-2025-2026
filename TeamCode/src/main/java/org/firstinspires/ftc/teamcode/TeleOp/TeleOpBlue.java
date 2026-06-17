@@ -3,16 +3,14 @@ package org.firstinspires.ftc.teamcode.TeleOp;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.Drive.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Hardware.Hardware;
 import org.firstinspires.ftc.teamcode.Vision.LimeLightVision;
 import java.util.List;
 
-@TeleOp(name = "===== DO NOT USE =====")
-public class ImprovedBackupTeleOp extends OpMode {
+@TeleOp(name = "TeleOp BLUE")
+public class TeleOpBlue extends OpMode {
 
     Hardware hw = new Hardware();
     MecanumDrive drive = new MecanumDrive();
@@ -68,8 +66,7 @@ public class ImprovedBackupTeleOp extends OpMode {
         drive.init(hw);
         LimeLight.init(hw);
         LimeLight.StartVision();
-        //TODO: Change the pipeline
-        LimeLight.ChangePipeline(0);
+        LimeLight.ChangePipeline(1);
         hw.shooterServo.setPosition(0);
         telemetry.addData("Status", "Fully Initialized");
     }
