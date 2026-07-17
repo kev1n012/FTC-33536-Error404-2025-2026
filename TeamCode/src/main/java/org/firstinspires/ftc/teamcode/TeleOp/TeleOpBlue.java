@@ -52,7 +52,7 @@ public class TeleOpBlue extends OpMode {
     private int CurCloseSpeed = 0;
     private static double FlywheelIdleVelocity = 800;
     private static final double OPEN_SERVO_POS = 0.25;
-    private static final double INTAKE_POWER = -0.6;
+    private static final double INTAKE_POWER = -1;
     private boolean lastDpadUp = false;
     private boolean lastDpadDown = false;
     private boolean lastDpadLeft = false;
@@ -99,7 +99,7 @@ public class TeleOpBlue extends OpMode {
             hw.ResetImu();
         }
 
-        if (!gamepad1.square){ drive.driveFieldRelative(forward, strafe, rotate); }
+        if (!gamepad1.square){ drive.drive(forward, strafe, rotate); }
 
         GameInfoTelemetry();
 

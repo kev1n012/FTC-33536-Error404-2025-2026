@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Hardware;
 
+import com.pedropathing.localization.PoseTracker;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -64,6 +65,23 @@ public class Hardware {
         imu.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD, GoBildaPinpointDriver.EncoderDirection.FORWARD);
 
         imu.resetPosAndIMU();
+    }
+
+    public void initAuto(HardwareMap hardwareMap){
+        flywheelL = hardwareMap.get(DcMotorEx.class, "flywheelL");
+        flywheelR = hardwareMap.get(DcMotorEx.class, "flywheelR");
+        intake = hardwareMap.get(DcMotorEx.class, "intake");
+        shooterServo = hardwareMap.get(Servo.class, "shooter_servo");
+        helperMotor = hardwareMap.get(DcMotorEx.class, "helper_motor");
+
+        flywheelR.setDirection(DcMotorEx.Direction.FORWARD);
+        flywheelL.setDirection(DcMotorEx.Direction.REVERSE);
+
+        intake.setDirection(DcMotorEx.Direction.REVERSE);
+        helperMotor.setDirection(DcMotorEx.Direction.FORWARD);
+
+        limelight = hardwareMap.get(Limelight3A.class, "limelight");
+
     }
 
     public void ResetImu() {

@@ -67,7 +67,7 @@ public class TestTeleop extends OpMode {
 
         hw.imu.update();
 
-        CamResult = LimeLight.UpdateCamera();
+//        CamResult = LimeLight.UpdateCamera();
         botPose = LimeLight.UpdateBotPos();
         AprilTagCoords = LimeLight.GetAprilTagCoords();
 

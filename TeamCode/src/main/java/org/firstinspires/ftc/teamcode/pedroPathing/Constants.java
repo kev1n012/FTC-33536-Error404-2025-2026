@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.pedroPathing;
 
 import com.pedropathing.control.FilteredPIDFCoefficients;
 import com.pedropathing.control.PIDFCoefficients;
+import com.pedropathing.control.PredictiveBrakingCoefficients;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.follower.FollowerConstants;
 import com.pedropathing.ftc.FollowerBuilder;
@@ -19,28 +20,26 @@ public class Constants {
     //TODO set the mass/weight in KG for the robot
     //DO not forget zero power acceleration!!!
     public static FollowerConstants followerConstants = new FollowerConstants()
-            .mass(5.0)
-            .forwardZeroPowerAcceleration(-39.761636841755085)
-            .lateralZeroPowerAcceleration( -48.73472159782229)
-            .translationalPIDFCoefficients(new PIDFCoefficients(0.04,0,0.01,0.025))
-            .headingPIDFCoefficients(new PIDFCoefficients(0.4, 0,0.003,0.035));
+            .mass(12.20)
+            .headingPIDFCoefficients(new PIDFCoefficients(1.1, 0,0.05,0.4))
+            .predictiveBrakingCoefficients(new PredictiveBrakingCoefficients(0.2, 0.07188766305026026, 0.0017563625703268448))
+            .centripetalScaling(0);
 
     public static PinpointConstants localizerConstants = new PinpointConstants()
-            .forwardPodY(92/2.54)
-            .strafePodX(90/2.54)
             .distanceUnit(DistanceUnit.MM)
+            .forwardPodY(92)
+            .strafePodX(90)
             .hardwareMapName("pinpoint")
             .encoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD)
             .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.REVERSED)
             .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD);
 
     public static PathConstraints pathConstraints = new PathConstraints(
-            0.99,
+            0.97,  // Changed from 0.99
             100,
             1,
             1);
 
-    //TODO Set motor names + direction
     public static MecanumConstants driveConstants = new MecanumConstants()
             .maxPower(1)
             .rightFrontMotorName("front_right")
@@ -63,6 +62,16 @@ public class Constants {
                 .build();
     }
 }
+
+/*
+* Tuning Tips
+    PedroPathing does not activate heading and translational PIDF correction for drive tuning. If you would like to test all three of them, navigate yourself to the Line Tuner in the Manual folder. Use it to adjust BrakingStrength, path constraints and making sure all PIDFs are working well together.
+    Increasing your drive PIDF will make the robot move more quickly along the path, at the risk of more overshoot at the end of the path.
+    Decreasing your drive PIDF will make the robot move more slowly and reduce the overshoot at the end of the path.
+    Adjusting the BrakingStrength can significantly help manage how smoothly the robot decelerates as it reaches the end of its path.
+    If the robot drives quickly during the middle of the path but abruptly slows down as it reaches the end of the path, this may be caused by the transition between the main and secondary PIDs. This problem may also be addressed through lowering the BrakingStrength.
+*
+* */
 
 
 //TODO check out helpful
