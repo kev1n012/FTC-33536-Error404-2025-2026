@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Autonomous.Blue.Short;
 
+
+
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
@@ -15,7 +17,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @Autonomous
-public class SHORT_PL_L1 extends OpMode {
+public class BLUE_SHORT_PL extends OpMode  {
+
 
     private DcMotorEx intake;
     private DcMotorEx helper_motor;
@@ -94,61 +97,35 @@ public class SHORT_PL_L1 extends OpMode {
     private static final double SHOOTER_POWER_SHORT = 1450;
     private boolean SHORT;
     private boolean LONG;
-        private Follower follower;
-        private Timer pathTimer, opModeTimer;
+    private Follower follower;
+    private Timer pathTimer, opModeTimer;
 
-
-
-
-    public enum PathState {
-        // START POSITION_END POSITION
-        // DRIVE > MOVEMENT
-        // SHOOT
-        // INTAKE
-        DRIVE_START_POS_SHOOT_POS,
-        SHOOT_PRELOAD,
-        DRIVE_ROTATE_LINE_1,
-        DRIVE_TAKE_LINE_1,
-        DRIVE_END_LINE_1_GATE_POS,
-        DRIVE_LINE_1_END_SHOOT_POS,
-        SHOOT_LINE1,
-        DRIVE_START_LINE_2_END_LINE_2,
-        DRIVE_END_LINE_2_SHOOT_POS,
-        DRIVE_END_LINE_2_GATE_POS,
-        DRIVE_GATE_POS_SHOOT_POS,
-        DRIVE_GATE_POS_SHOOT_POS_2,
-        SHOOT_LINE_2,
-        DRIVE_START_LINE_3_END_LINE_3,
-        DRIVE_END_LINE_3_SHOOT_POS,
-        SHOOT_LINE_3,
-        MOVE_OFF_LINE
-    }
-
-    PathState pathState;
+    BLUE_SHORT_PL_L1.PathState pathState;
 
     private final Pose startPose = new Pose(19,121, Math.toRadians(144));
     private final Pose shootPose = new Pose(55.5,85.5, Math.toRadians(138));
     private final Pose line1Start = new Pose(55.5,85.5, Math.toRadians(180));
     private final Pose line1Curve = new Pose(40.5, 84.5, Math.toRadians(180));
     private final Pose line1End = new Pose(20, 84.5, Math.toRadians(180));
-    private final Pose offPose = new Pose(26,90, Math.toRadians(270));
+    private final Pose line2Start = new Pose(55.5,85.5, Math.toRadians(180));
+    private final Pose line2Curve = new Pose(58.5,58);
+    private final Pose line2End = new Pose(12.5,62, Math.toRadians(180));
+    private final Pose line2returnCurve = new Pose(47.5,67);
+    private final Pose offPose = new Pose(14,115, Math.toRadians(270));
 
 
 
     private PathChain driveStartPosShootPos;
-    private PathChain driveShootPosStartL1;
     private PathChain driveStartL1EndL1;
     private PathChain driveEndL1ShootPose;
+    private PathChain driveStartL2EndL2;
+    private PathChain driveEndL2ShootPose;
     private PathChain driveshootPosOffPos;
 
     public void buildPaths() {
         driveStartPosShootPos = follower.pathBuilder()
                 .addPath(new BezierLine(startPose,shootPose))
                 .setLinearHeadingInterpolation(startPose.getHeading(), shootPose.getHeading())
-                .build();
-        driveShootPosStartL1 = follower.pathBuilder()
-                .addPath(new BezierLine(shootPose,line1Start))
-                .setLinearHeadingInterpolation(shootPose.getHeading(), line1Start.getHeading())
                 .build();
         driveStartL1EndL1 = follower.pathBuilder()
                 .addPath(new BezierCurve(line1Start, line1Curve, line1End))
@@ -157,6 +134,14 @@ public class SHORT_PL_L1 extends OpMode {
         driveEndL1ShootPose = follower.pathBuilder()
                 .addPath(new BezierLine(line1End,shootPose))
                 .setLinearHeadingInterpolation(line1End.getHeading(), shootPose.getHeading())
+                .build();
+        driveStartL2EndL2 = follower.pathBuilder()
+                .addPath(new BezierCurve(line2Start, line2Curve, line2End))
+                .setLinearHeadingInterpolation(line2Start.getHeading(), line2End.getHeading())
+                .build();
+        driveEndL2ShootPose = follower.pathBuilder()
+                .addPath(new BezierCurve(line2End, line2returnCurve, shootPose))
+                .setLinearHeadingInterpolation(line2End.getHeading(), shootPose.getHeading())
                 .build();
         driveshootPosOffPos = follower.pathBuilder()
                 .addPath(new BezierLine(shootPose,offPose))
@@ -169,16 +154,17 @@ public class SHORT_PL_L1 extends OpMode {
         switch(pathState) {
             case DRIVE_START_POS_SHOOT_POS:
                 follower.followPath(driveStartPosShootPos, true);
-                setPathState(PathState.SHOOT_PRELOAD);
+                setPathState(BLUE_SHORT_PL_L1.PathState.SHOOT_PRELOAD);
                 flywheelR.setVelocity(ShooterVel());
                 flywheelL.setVelocity(ShooterVel());
                 break;
+
             case SHOOT_PRELOAD:
                 if (!follower.isBusy()) {
                     telemetry.addLine("Done Path 1");
                     if (pathTimer.getElapsedTimeSeconds() > 0.2) {
                         SHORT = true;
-                        intake.setPower(-0.8);
+                        intake.setPower(-0.75);
                         helper_motor.setPower(-0.8);
                         flywheelL.setVelocity(SHOOTER_POWER_SHORT);
                         flywheelR.setVelocity(SHOOTER_POWER_SHORT);
@@ -188,66 +174,21 @@ public class SHORT_PL_L1 extends OpMode {
                             shooter_servo.setPosition(CLOSE_SERVO_POS);
                         }
                     }
-                    if (pathTimer.getElapsedTimeSeconds() > 4.4) {
+                    if (pathTimer.getElapsedTimeSeconds() > 8) {
                         intake.setPower(0);
                         helper_motor.setPower(0);
-                        flywheelR.setVelocity(ShooterVel());
-                        flywheelL.setVelocity(ShooterVel());
+                        flywheelR.setVelocity(0);
+                        flywheelL.setVelocity(0);
                         shooter_servo.setPosition(CLOSE_SERVO_POS);
-                        setPathState(PathState.DRIVE_TAKE_LINE_1);
+                        follower.followPath(driveshootPosOffPos);
+                        setPathState(BLUE_SHORT_PL_L1.PathState.MOVE_OFF_LINE);
                     }
                 }
                 break;
 
-            case DRIVE_TAKE_LINE_1:
-                if (!follower.isBusy() ) {
-                    telemetry.addLine("Taking Line 1");
-                    intake.setPower(-0.8);
-                    helper_motor.setPower(-0.8);
-                    follower.followPath(driveStartL1EndL1);
-                    setPathState(PathState.DRIVE_LINE_1_END_SHOOT_POS);
-                }
-                break;
-            case DRIVE_LINE_1_END_SHOOT_POS:
-                if ((!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2) || pathTimer.getElapsedTimeSeconds() > 4) {
-
-                    helper_motor.setPower(0);
-                    telemetry.addLine("Shooting Line 1");
-                    follower.followPath(driveEndL1ShootPose);
-                    setPathState(PathState.SHOOT_LINE1);
-                }
-                break;
-            case SHOOT_LINE1:
-                if (!follower.isBusy()) {
-                    telemetry.addLine("Shot Line 1");
-                    if (pathTimer.getElapsedTimeSeconds() > 0.2) {
-                        SHORT = true;
-                        intake.setPower(-0.8);
-                        helper_motor.setPower(-0.8);
-                        flywheelL.setVelocity(SHOOTER_POWER_SHORT);
-                        flywheelR.setVelocity(SHOOTER_POWER_SHORT);
-                        if (SHORT && rightFlywheelSpeed > OPEN_SHOOTER_SERVO_SHORT) {
-                            shooter_servo.setPosition(OPEN_SERVO_POS);
-                        } else if (SHORT && rightFlywheelSpeed < CLOSE_SHOOTER_SERVO_SHORT) {
-                            shooter_servo.setPosition(CLOSE_SERVO_POS);
-                        }
-                        if (pathTimer.getElapsedTimeSeconds() > 4.2) {
-                            follower.followPath(driveshootPosOffPos, true);
-                            setPathState(PathState.MOVE_OFF_LINE);
-                            intake.setPower(0);
-                            helper_motor.setPower(0);
-                            flywheelR.setVelocity(0);
-                            flywheelL.setVelocity(0);
-                            shooter_servo.setPosition(CLOSE_SERVO_POS);
-                        }
-
-                    }
-                }
-                break;
             case MOVE_OFF_LINE:
                 if (!follower.isBusy()){
                     telemetry.addLine("Done all Paths");
-
                 }
                 break;
             default:
@@ -258,22 +199,20 @@ public class SHORT_PL_L1 extends OpMode {
     }
 
 
-    public void setPathState(PathState newState) {
+    public void setPathState(BLUE_SHORT_PL_L1.PathState newState) {
         pathState = newState;
         pathTimer.resetTimer();
     }
 
     @Override
     public void init() {
-
-        pathState = PathState.DRIVE_START_POS_SHOOT_POS;
+        pathState = BLUE_SHORT_PL_L1.PathState.DRIVE_START_POS_SHOOT_POS;
         pathTimer = new Timer();
         opModeTimer = new Timer();
         follower = Constants.createFollower(hardwareMap);
         initializeHardware();
         configureMotors();
         shooter_servo.setPosition(0);
-
         buildPaths();
         follower.setPose(startPose);
     }
@@ -301,3 +240,5 @@ public class SHORT_PL_L1 extends OpMode {
 
     }
 }
+
+

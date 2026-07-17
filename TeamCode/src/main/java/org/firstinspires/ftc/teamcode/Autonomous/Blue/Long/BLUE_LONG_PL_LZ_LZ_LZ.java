@@ -8,61 +8,16 @@ import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.Servo;
+import org.firstinspires.ftc.teamcode.Hardware.Hardware;
 
-import org.firstinspires.ftc.teamcode.LONG_PL_LZ_L3_LZ_SHOTVEL;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @Autonomous
-public class LONG_PL_LZ_LZ_LZ extends OpMode {
-
-
-    private DcMotorEx intake;
-    private DcMotorEx helper_motor;
-    private DcMotorEx flywheelR, flywheelL;
-    private Servo shooter_servo;
-
+public class BLUE_LONG_PL_LZ_LZ_LZ extends OpMode {
     private double rightFlywheelSpeed = 0;
     private double leftFlywheelSpeed = 0;
-
-    private static final int TICKS_PER_REVOLUTION = 28;
-
-    public void setFlywheels(double speed) {
-        this.flywheelL.setVelocity(speed);
-        this.flywheelR.setVelocity(speed);
-    }
-
-    private void initializeHardware() {
-        intake = hardwareMap.get(DcMotorEx.class, "intake");
-        helper_motor = hardwareMap.get(DcMotorEx.class, "helper_motor");
-        flywheelR = hardwareMap.get(DcMotorEx.class, "flywheelR");
-        flywheelL = hardwareMap.get(DcMotorEx.class, "flywheelL");
-        shooter_servo = hardwareMap.get(Servo.class, "shooter_servo");
-
-    }
-
-
-    private void configureMotors() {
-        intake.setDirection(DcMotor.Direction.REVERSE);
-        intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        helper_motor.setDirection(DcMotor.Direction.REVERSE);
-        helper_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        flywheelR.setDirection(DcMotor.Direction.FORWARD);
-        flywheelL.setDirection(DcMotor.Direction.REVERSE);
-        setMotorRunMode(flywheelR);
-        setMotorRunMode(flywheelL);
-    }
-
-    private void setMotorRunMode(DcMotorEx motor) {
-        motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-    }
-
-    private double calculateRPM(DcMotorEx motor, double ticksPerRevolution) {
-        return (motor.getVelocity() / ticksPerRevolution) * 60.0;
-    }
-
+    
+    private Hardware hw;
     private double ShooterVel() {
         Pose curPos = follower.getPose();
 
@@ -103,7 +58,7 @@ public class LONG_PL_LZ_LZ_LZ extends OpMode {
 
 
 
-    LONG_PL_LZ_L3_LZ.PathStateLong pathState;
+    BLUE_LONG_PL_LZ_L3_LZ.PathStateLong pathState;
 
     private final Pose startPoseLong = new Pose(55.5,8, Math.toRadians(90));
     private final Pose shootPoseLong = new Pose(55.5,15, Math.toRadians(113));
@@ -172,33 +127,31 @@ public class LONG_PL_LZ_LZ_LZ extends OpMode {
         switch(pathState) {
             case DRIVE_START_LONG_POS_SHOOT_LONG_POS:
                 follower.followPath(driveStartLongPosShootLongPos, true);
-                setPathState(LONG_PL_LZ_L3_LZ.PathStateLong.SHOOT_PRELOAD_LONG);
-                flywheelR.setVelocity(ShooterVel());
-                flywheelL.setVelocity(ShooterVel());
+                setPathState(BLUE_LONG_PL_LZ_L3_LZ.PathStateLong.SHOOT_PRELOAD_LONG);
+                hw.setFlywheels(ShooterVel());
+                
                 break;
             case SHOOT_PRELOAD_LONG:
                 if (!follower.isBusy() ) {
                     telemetry.addLine("Done Path 1");
                     if (pathTimer.getElapsedTimeSeconds() > 1) {
                         LONG = true;
-                        intake.setPower(-0.8);
-                        helper_motor.setPower(-0.8);
-                        flywheelL.setVelocity(SHOOTER_POWER_LONG);
-                        flywheelR.setVelocity(SHOOTER_POWER_LONG);
+                        hw.intake.setPower(-0.8);
+                        hw.helperMotor.setPower(-0.8);
+                        hw.setFlywheels(SHOOTER_POWER_LONG);
                         if (LONG && rightFlywheelSpeed > OPEN_SHOOTER_SERVO_LONG) {
-                            shooter_servo.setPosition(OPEN_SERVO_POS);
+                            hw.shooterServo.setPosition(OPEN_SERVO_POS);
                         } else if (LONG && rightFlywheelSpeed < CLOSE_SHOOTER_SERVO_LONG) {
-                            shooter_servo.setPosition(CLOSE_SERVO_POS);
+                            hw.shooterServo.setPosition(CLOSE_SERVO_POS);
                         }
 
                     }
                     if (pathTimer.getElapsedTimeSeconds() > 5.5) {
-                        setPathState(LONG_PL_LZ_L3_LZ.PathStateLong.DRIVE_SHOOT_POS_LOAD_ZONE_POS);
-                        intake.setPower(0);
-                        helper_motor.setPower(0);
-                        flywheelR.setVelocity(ShooterVel());
-                        flywheelL.setVelocity(ShooterVel());
-                        shooter_servo.setPosition(CLOSE_SERVO_POS);
+                        setPathState(BLUE_LONG_PL_LZ_L3_LZ.PathStateLong.DRIVE_SHOOT_POS_LOAD_ZONE_POS);
+                        hw.intake.setPower(0);
+                        hw.helperMotor.setPower(0);
+                        hw.setFlywheels(ShooterVel());
+                        hw.shooterServo.setPosition(CLOSE_SERVO_POS);
 
                     }
                 }
@@ -206,19 +159,19 @@ public class LONG_PL_LZ_LZ_LZ extends OpMode {
             case DRIVE_SHOOT_POS_LOAD_ZONE_POS:
                 if (!follower.isBusy()) {
                     telemetry.addLine("Taking LoadZone");
-                    intake.setPower(-0.8);
-                    helper_motor.setPower(-0.8);
+                    hw.intake.setPower(-0.8);
+                    hw.helperMotor.setPower(-0.8);
                     follower.followPath(driveShootLongPosLoadPosUpCurve);
-                    setPathState(LONG_PL_LZ_L3_LZ.PathStateLong.DRIVE_LOAD_ZONE_POS_SHOOT_POS);
+                    setPathState(BLUE_LONG_PL_LZ_L3_LZ.PathStateLong.DRIVE_LOAD_ZONE_POS_SHOOT_POS);
                 }
                 break;
             case DRIVE_LOAD_ZONE_POS_SHOOT_POS:
                 if ((!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2.5) || pathTimer.getElapsedTimeSeconds() > 3) {
                     telemetry.addLine("Took LoadZone");
 
-                    helper_motor.setPower(0);
+                    hw.helperMotor.setPower(0);
                     follower.followPath(driveLoadPosUpShootLongPos);
-                    setPathState(LONG_PL_LZ_L3_LZ.PathStateLong.SHOOT_LZ_1);
+                    setPathState(BLUE_LONG_PL_LZ_L3_LZ.PathStateLong.SHOOT_LZ_1);
                 }
                 break;
             case SHOOT_LZ_1:
@@ -226,24 +179,22 @@ public class LONG_PL_LZ_LZ_LZ extends OpMode {
                     telemetry.addLine("Shot LZ 1");
                     if (pathTimer.getElapsedTimeSeconds() > 1) {
                         LONG = true;
-                        intake.setPower(-0.8);
-                        helper_motor.setPower(-0.85);
-                        flywheelL.setVelocity(SHOOTER_POWER_LONG);
-                        flywheelR.setVelocity(SHOOTER_POWER_LONG);
+                        hw.intake.setPower(-0.8);
+                        hw.helperMotor.setPower(-0.85);
+                        hw.setFlywheels(SHOOTER_POWER_LONG);
                         if (LONG && rightFlywheelSpeed > OPEN_SHOOTER_SERVO_LONG) {
-                            shooter_servo.setPosition(OPEN_SERVO_POS);
+                            hw.shooterServo.setPosition(OPEN_SERVO_POS);
                         } else if (LONG && rightFlywheelSpeed < CLOSE_SHOOTER_SERVO_LONG) {
-                            shooter_servo.setPosition(CLOSE_SERVO_POS);
+                            hw.shooterServo.setPosition(CLOSE_SERVO_POS);
                         }
 
                     }
                     if (pathTimer.getElapsedTimeSeconds() > 5) {
-                        setPathState(LONG_PL_LZ_L3_LZ.PathStateLong.DRIVE_SHOOT_POS_LOAD_ZONE_SIDE_POS);
-                        intake.setPower(0);
-                        helper_motor.setPower(0);
-                        flywheelR.setVelocity(ShooterVel());
-                        flywheelL.setVelocity(ShooterVel());
-                        shooter_servo.setPosition(CLOSE_SERVO_POS);
+                        setPathState(BLUE_LONG_PL_LZ_L3_LZ.PathStateLong.DRIVE_SHOOT_POS_LOAD_ZONE_SIDE_POS);
+                        hw.intake.setPower(0);
+                        hw.helperMotor.setPower(0);
+                        hw.setFlywheels(ShooterVel());
+                        hw.shooterServo.setPosition(CLOSE_SERVO_POS);
 
                     }
                 }
@@ -252,10 +203,10 @@ public class LONG_PL_LZ_LZ_LZ extends OpMode {
             case DRIVE_SHOOT_POS_LOAD_ZONE_SIDE_POS:
                 if (!follower.isBusy()) {
                     telemetry.addLine("Taking LoadZone");
-                    intake.setPower(-0.8);
-                    helper_motor.setPower(-0.8);
+                    hw.intake.setPower(-0.8);
+                    hw.helperMotor.setPower(-0.8);
                     follower.followPath(driveShootLongPosLoadPosSideCurve);
-                    setPathState(LONG_PL_LZ_L3_LZ.PathStateLong.DRIVE_LOAD_ZONE_SIDE_POS_SHOOT_POS);
+                    setPathState(BLUE_LONG_PL_LZ_L3_LZ.PathStateLong.DRIVE_LOAD_ZONE_SIDE_POS_SHOOT_POS);
                 }
                 break;
 
@@ -263,9 +214,9 @@ public class LONG_PL_LZ_LZ_LZ extends OpMode {
                 if ((!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2) || pathTimer.getElapsedTimeSeconds() > 2.5) {
                     telemetry.addLine("Took LoadZone");
 
-                    helper_motor.setPower(0);
+                    hw.helperMotor.setPower(0);
                     follower.followPath(driveLoadPosSideShootLongPos);
-                    setPathState(LONG_PL_LZ_L3_LZ.PathStateLong.SHOOT_LZ_2);
+                    setPathState(BLUE_LONG_PL_LZ_L3_LZ.PathStateLong.SHOOT_LZ_2);
                 }
                 break;
 
@@ -274,25 +225,23 @@ public class LONG_PL_LZ_LZ_LZ extends OpMode {
                     telemetry.addLine("Shot LZ 2");
                     if (pathTimer.getElapsedTimeSeconds() > 1) {
                         LONG = true;
-                        intake.setPower(-0.8);
-                        helper_motor.setPower(-0.85);
-                        flywheelL.setVelocity(SHOOTER_POWER_LONG);
-                        flywheelR.setVelocity(SHOOTER_POWER_LONG);
+                        hw.intake.setPower(-0.8);
+                        hw.helperMotor.setPower(-0.85);
+                        hw.setFlywheels(SHOOTER_POWER_LONG);
                         if (LONG && rightFlywheelSpeed > OPEN_SHOOTER_SERVO_LONG) {
-                            shooter_servo.setPosition(OPEN_SERVO_POS);
+                            hw.shooterServo.setPosition(OPEN_SERVO_POS);
                         } else if (LONG && rightFlywheelSpeed < CLOSE_SHOOTER_SERVO_LONG) {
-                            shooter_servo.setPosition(CLOSE_SERVO_POS);
+                            hw.shooterServo.setPosition(CLOSE_SERVO_POS);
                         }
 
                     }
                     if (pathTimer.getElapsedTimeSeconds() > 5) {
 
-                        setPathState(LONG_PL_LZ_L3_LZ.PathStateLong.DRIVE_SHOOT_POS_LOAD_ZONE_SIDE_POS_2);
-                        intake.setPower(0);
-                        helper_motor.setPower(0);
-                        flywheelR.setVelocity(ShooterVel());
-                        flywheelL.setVelocity(ShooterVel());
-                        shooter_servo.setPosition(CLOSE_SERVO_POS);
+                        setPathState(BLUE_LONG_PL_LZ_L3_LZ.PathStateLong.DRIVE_SHOOT_POS_LOAD_ZONE_SIDE_POS_2);
+                        hw.intake.setPower(0);
+                        hw.helperMotor.setPower(0);
+                        hw.setFlywheels(ShooterVel());
+                        hw.shooterServo.setPosition(CLOSE_SERVO_POS);
 
                     }
                 }
@@ -301,10 +250,10 @@ public class LONG_PL_LZ_LZ_LZ extends OpMode {
             case DRIVE_SHOOT_POS_LOAD_ZONE_SIDE_POS_2:
                 if (!follower.isBusy()) {
                     telemetry.addLine("Taking LoadZone");
-                    intake.setPower(-0.8);
-                    helper_motor.setPower(-0.8);
+                    hw.intake.setPower(-0.8);
+                    hw.helperMotor.setPower(-0.8);
                     follower.followPath(driveShootLongPosLoadPosSideCurve);
-                    setPathState(LONG_PL_LZ_L3_LZ.PathStateLong.DRIVE_LOAD_ZONE_SIDE_POS_SHOOT_POS_2);
+                    setPathState(BLUE_LONG_PL_LZ_L3_LZ.PathStateLong.DRIVE_LOAD_ZONE_SIDE_POS_SHOOT_POS_2);
                 }
                 break;
 
@@ -312,9 +261,9 @@ public class LONG_PL_LZ_LZ_LZ extends OpMode {
                 if ((!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2) || pathTimer.getElapsedTimeSeconds() > 2.5) {
                     telemetry.addLine("Took LoadZone");
 
-                    helper_motor.setPower(0);
+                    hw.helperMotor.setPower(0);
                     follower.followPath(driveLoadPosSideShootLongPos);
-                    setPathState(LONG_PL_LZ_L3_LZ.PathStateLong.SHOOT_LZ_3);
+                    setPathState(BLUE_LONG_PL_LZ_L3_LZ.PathStateLong.SHOOT_LZ_3);
                 }
                 break;
 
@@ -323,25 +272,23 @@ public class LONG_PL_LZ_LZ_LZ extends OpMode {
                     telemetry.addLine("Shot LZ 3");
                     if (pathTimer.getElapsedTimeSeconds() > 1) {
                         LONG = true;
-                        intake.setPower(-0.8);
-                        helper_motor.setPower(-0.85);
-                        flywheelL.setVelocity(SHOOTER_POWER_LONG);
-                        flywheelR.setVelocity(SHOOTER_POWER_LONG);
+                        hw.intake.setPower(-0.8);
+                        hw.helperMotor.setPower(-0.85);
+                        hw.setFlywheels(SHOOTER_POWER_LONG);
                         if (LONG && rightFlywheelSpeed > OPEN_SHOOTER_SERVO_LONG) {
-                            shooter_servo.setPosition(OPEN_SERVO_POS);
+                            hw.shooterServo.setPosition(OPEN_SERVO_POS);
                         } else if (LONG && rightFlywheelSpeed < CLOSE_SHOOTER_SERVO_LONG) {
-                            shooter_servo.setPosition(CLOSE_SERVO_POS);
+                            hw.shooterServo.setPosition(CLOSE_SERVO_POS);
                         }
 
                     }
                     if (pathTimer.getElapsedTimeSeconds() > 5) {
                         follower.followPath(driveShootLongPosOffLongPos, true);
-                        setPathState(LONG_PL_LZ_L3_LZ.PathStateLong.MOVE_OFF_LONG_LINE);
-                        intake.setPower(0);
-                        helper_motor.setPower(0);
-                        flywheelR.setVelocity(0);
-                        flywheelL.setVelocity(0);
-                        shooter_servo.setPosition(CLOSE_SERVO_POS);
+                        setPathState(BLUE_LONG_PL_LZ_L3_LZ.PathStateLong.MOVE_OFF_LONG_LINE);
+                        hw.intake.setPower(0);
+                        hw.helperMotor.setPower(0);
+                        hw.setFlywheels(0);
+                        hw.shooterServo.setPosition(CLOSE_SERVO_POS);
 
                     }
                 }
@@ -360,7 +307,7 @@ public class LONG_PL_LZ_LZ_LZ extends OpMode {
     }
 
 
-    public void setPathState(LONG_PL_LZ_L3_LZ.PathStateLong newState) {
+    public void setPathState(BLUE_LONG_PL_LZ_L3_LZ.PathStateLong newState) {
         pathState = newState;
         pathTimer.resetTimer();
     }
@@ -368,13 +315,11 @@ public class LONG_PL_LZ_LZ_LZ extends OpMode {
     @Override
     public void init() {
 
-        pathState = LONG_PL_LZ_L3_LZ.PathStateLong.DRIVE_START_LONG_POS_SHOOT_LONG_POS;
+        pathState = BLUE_LONG_PL_LZ_L3_LZ.PathStateLong.DRIVE_START_LONG_POS_SHOOT_LONG_POS;
         pathTimer = new Timer();
         opModeTimer = new Timer();
         follower = Constants.createFollower(hardwareMap);
-        initializeHardware();
-        configureMotors();
-        shooter_servo.setPosition(0);
+        hw.shooterServo.setPosition(0);
 
         buildPaths();
         follower.setPose(startPoseLong);
@@ -390,15 +335,15 @@ public class LONG_PL_LZ_LZ_LZ extends OpMode {
     public void loop() {
         follower.update();
         statePathUpdate();
-        rightFlywheelSpeed = flywheelR.getVelocity();
-        leftFlywheelSpeed =  flywheelL.getVelocity();
+        rightFlywheelSpeed = hw.flywheelR.getVelocity();
+        leftFlywheelSpeed =  hw.flywheelL.getVelocity();
 
 
 
         if (SHORT && rightFlywheelSpeed > OPEN_SHOOTER_SERVO_SHORT) {
-            shooter_servo.setPosition(OPEN_SERVO_POS);
+            hw.shooterServo.setPosition(OPEN_SERVO_POS);
         } else if (SHORT && rightFlywheelSpeed < CLOSE_SHOOTER_SERVO_SHORT) {
-            shooter_servo.setPosition(CLOSE_SERVO_POS);
+            hw.shooterServo.setPosition(CLOSE_SERVO_POS);
         }
 
         telemetry.addData("path state", pathState.toString());

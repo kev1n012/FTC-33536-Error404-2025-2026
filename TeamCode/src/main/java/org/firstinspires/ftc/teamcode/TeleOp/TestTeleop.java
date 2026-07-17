@@ -20,8 +20,8 @@ public class TestTeleop extends OpMode {
     private double flywheelSpeedR, flywheelsSpeedL;
 
     private int CurVol = 0;
-    private int CurOpenSpeed = 0;
-    private int CurCloseSpeed = 0;
+    private int CurOpenSpeed = 1600;
+    private int CurCloseSpeed = 1450;
 
     private static final double OPEN_SERVO_POS = 0.25;
     private static final double INTAKE_POWER = -0.6;

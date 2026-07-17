@@ -48,8 +48,8 @@ public class TeleOpRed extends OpMode {
     private final double FarShootDistance = 3.00;
     private double flywheelSpeedR, flywheelsSpeedL;
     private int CurVol = 0;
-    private int CurOpenSpeed = 0;
-    private int CurCloseSpeed = 0;
+    private int CurOpenSpeed = 1600;
+    private int CurCloseSpeed = 1450;
     private static double FlywheelIdleVelocity = 800;
     private static final double OPEN_SERVO_POS = 0.25;
     private static final double INTAKE_POWER = -1;
